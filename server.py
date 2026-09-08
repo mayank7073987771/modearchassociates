@@ -26,7 +26,13 @@ uploads = AsyncIOMotorGridFSBucket(db, bucket_name="uploads")
 
 # Create the main app without a prefix
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://bright-lollipop-1c73e8.netlify.app", "*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
