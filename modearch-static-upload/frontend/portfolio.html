@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio - Mode Arch Associates</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f8f9fa; color: #333; padding: 40px 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { font-size: 2.2rem; color: #1a1a1a; margin-bottom: 10px; }
+    .header p { color: #666; font-size: 1rem; }
+    
+    .filter-btn-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
+    .filter-btn { padding: 8px 18px; border-radius: 20px; border: 1px solid #ddd; background-color: #fff; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+    .filter-btn.active, .filter-btn:hover { background-color: #000; color: #fff; border-color: #000; }
+    
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s; }
+    .card:hover { transform: translateY(-4px); }
+    .card img { width: 100%; height: 220px; object-fit: cover; display: block; }
+    .card-info { padding: 12px 15px; }
+    .card-title { font-weight: bold; font-size: 1rem; color: #222; margin-bottom: 4px; }
+    .card-loc { color: #777; font-size: 0.85rem; }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; justify-content: center; align-items: center; padding: 20px; }
+    .modal img { max-width: 90%; max-height: 80vh; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Our Design Portfolio</h1>
+    <p>Explore our interior architecture projects in Dahisar, Borivali, & Mumbai</p>
+  </div>
+
+  <div class="filter-btn-container">
+    <button class="filter-btn active" onclick="filterGallery('All')">All</button>
+    <button class="filter-btn" onclick="filterGallery('Living Room')">Living Room</button>
+    <button class="filter-btn" onclick="filterGallery('Bedroom')">Bedroom</button>
+    <button class="filter-btn" onclick="filterGallery('Kitchen')">Kitchen</button>
+    <button class="filter-btn" onclick="filterGallery('Commercial')">Commercial</button>
+  </div>
+
+  <div class="gallery-grid" id="galleryGrid"></div>
+</div>
+
+<div class="modal" id="imageModal" onclick="closeModal()">
+  <img id="modalImg" src="" alt="Full View">
+</div>
+
+<script>
+  const portfolioData = [
+    { title: "Modern Living Room Interior Design", cat: "Living Room", loc: "Dahisar West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873292/WhatsApp_Image_2026-09-06_at_11.44.50_AM_6.jpg" },
+    { title: "Luxury Master Bedroom Concept", cat: "Bedroom", loc: "Borivali West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873292/WhatsApp_Image_2026-09-06_at_11.44.50_AM_7.jpg" },
+    { title: "Modular Kitchen & Dining Setup", cat: "Kitchen", loc: "Kandivali West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873290/WhatsApp_Image_2026-09-08_at_6.41.09_PM_1.jpg" },
+    { title: "Contemporary Living Space", cat: "Living Room", loc: "Dahisar East, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873290/WhatsApp_Image_2026-09-08_at_6.41.09_PM.jpg" },
+    { title: "Premium Wooden Ceiling & Lighting", cat: "Living Room", loc: "Borivali East, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873289/WhatsApp_Image_2026-09-08_at_6.41.10_PM.jpg" },
+    { title: "Minimalist Bedroom Interior", cat: "Bedroom", loc: "Malad West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873289/WhatsApp_Image_2026-09-08_at_6.41.10_PM_1.jpg" },
+    { title: "Custom Wardrobe & Storage", cat: "Bedroom", loc: "Dahisar West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873289/WhatsApp_Image_2026-09-08_at_6.42.01_PM_1.jpg" },
+    { title: "Elegant Sofa Lounge Area", cat: "Living Room", loc: "Borivali West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873289/WhatsApp_Image_2026-09-08_at_6.41.18_PM.jpg" },
+    { title: "Sleek Modular Kitchen Design", cat: "Kitchen", loc: "Kandivali East, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873289/WhatsApp_Image_2026-09-08_at_6.41.19_PM.jpg" },
+    { title: "Ambient Light Bedroom Setup", cat: "Bedroom", loc: "Dahisar West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873289/WhatsApp_Image_2026-09-08_at_6.41.19_PM_1.jpg" },
+    { title: "Modern Commercial Office Interior", cat: "Commercial", loc: "Borivali West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873289/WhatsApp_Image_2026-09-08_at_6.41.19_PM_3.jpg" },
+    { title: "Designer TV Unit Wall", cat: "Living Room", loc: "Kandivali West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873288/WhatsApp_Image_2026-09-08_at_6.41.20_PM_2.jpg" },
+    { title: "Luxury Dining Room Experience", cat: "Living Room", loc: "Dahisar East, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873288/WhatsApp_Image_2026-09-08_at_6.42.01_PM_2.jpg" },
+    { title: "Cozy Kids Bedroom Design", cat: "Bedroom", loc: "Borivali East, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873288/WhatsApp_Image_2026-09-08_at_6.42.01_PM_3.jpg" },
+    { title: "Compact Kitchen Interior Solution", cat: "Kitchen", loc: "Dahisar West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873288/WhatsApp_Image_2026-09-08_at_6.42.02_PM_1.jpg" },
+    { title: "Premium False Ceiling Design", cat: "Living Room", loc: "Kandivali West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873287/WhatsApp_Image_2026-09-08_at_6.42.00_PM.jpg" },
+    { title: "Architectural Lighting & Decor", cat: "Living Room", loc: "Borivali West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873287/WhatsApp_Image_2026-09-08_at_6.42.02_PM_3.jpg" },
+    { title: "Modern Bathroom & Vanity Area", cat: "Commercial", loc: "Dahisar East, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873287/WhatsApp_Image_2026-09-08_at_6.42.00_PM_1.jpg" },
+    { title: "Complete 3BHK Turnkey Interior", cat: "Living Room", loc: "Borivali West, Mumbai", img: "https://res.cloudinary.com/r8jz7kri/image/upload/v1788873286/WhatsApp_Image_2026-09-08_at_6.42.01_PM.jpg" }
+  ];
+
+  function renderGrid(data) {
+    const grid = document.getElementById('galleryGrid');
+    grid.innerHTML = data.map(item => `
+      <div class="card" onclick="openModal('${item.img}')">
+        <img src="${item.img}" alt="${item.title}" loading="lazy">
+        <div class="card-info">
+          <div class="card-title">${item.title}</div>
+          <div class="card-loc">📍 ${item.loc}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterGallery(category) {
+    const btns = document.querySelectorAll('.filter-btn');
+    btns.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (category === 'All') {
+      renderGrid(portfolioData);
+    } else {
+      renderGrid(portfolioData.filter(i => i.cat === category));
+    }
+  }
+
+  function openModal(imgSrc) {
+    document.getElementById('modalImg').src = imgSrc;
+    document.getElementById('imageModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('imageModal').style.display = 'none';
+  }
+
+  // Initial load
+  renderGrid(portfolioData);
+</script>
+
+</body>
+</html>
